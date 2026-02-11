@@ -3,10 +3,11 @@
   "description": "is a tiny ICU message tool belt",
   "version": "0.0.0",
   "type": "module",
-  "types": "haicu.d.ts",
-  "exports": "haicu.js",
+  "types": "./haicu.d.ts",
+  "exports": "./haicu.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "tsc": "tsc --project ."
   },
   "repository": {
     "type": "git",
