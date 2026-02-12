@@ -3,15 +3,17 @@ import { test } from 'node:test'
 import haicu from 'haicu'
 import type { MessageToken } from 'haicu'
 
+type TestData = {
+	input: string
+	output: MessageToken[]
+}
+
 test('haicu', () => {
 	for (const { input, output } of [
 		{
 			input: '',
-			output: ['']
+			output: []
 		},
-	] satisfies Array<{
-		input: string
-		output: MessageToken[]
-	}>)
+	] satisfies TestData[])
 		assert.deepEqual(haicu(input), output)
 })
