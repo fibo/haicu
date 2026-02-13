@@ -1,18 +1,16 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
-import { extractText } from 'haicu'
+import { extractArg } from 'haicu'
 
-test('extractText', () => {
+test('extractArg', () => {
 	for (const { input, output } of [
 		{
 			input: '',
 			output: []
 		},
 		{
-			input: 'text',
-			output: [
-				{ type: 'text', text: 'text' }
-			]
+			input: 'hello',
+			output: [{ type: 'text', text: 'hello' }]
 		},
 		{
 			input: 'hello, {name}',
@@ -32,11 +30,8 @@ test('extractText', () => {
 			input: `hello
 world`,
 			output: [
-				{
-					type: 'text',
-					text: `hello
-world`,
-				}
+				{ type: 'text', text: `hello
+world` }
 			]
 		},
 		{
@@ -45,9 +40,9 @@ arg }`,
 			output: [
 				{ type: 'text', text: 'hello ' },
 				`{
-arg }`,
+arg }`
 			]
 		},
 	])
-		assert.deepEqual(extractText(input), output)
+		assert.deepEqual(extractArg(input), output)
 })

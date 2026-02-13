@@ -23,7 +23,7 @@ export const extractEscaped = arg => arg.matchAll(RegExp(
 		return accumulator.concat(tokens)
 	}, [])
 
-export const extractText = arg => arg.matchAll(RegExp(
+export const extractArg = arg => arg.matchAll(RegExp(
 	`(?<textBefore>[^${OPEN}]*)` +
 	'(:?' +
 	`(?<messageArg>\\${OPEN}[^${CLOSE}]*\\${CLOSE})` +
@@ -44,7 +44,12 @@ export const extractText = arg => arg.matchAll(RegExp(
 		return accumulator.concat(tokens)
 	}, [])
 
+export const lexer = arg => extractEscaped(arg)
+	.reduce((tokens, result) => tokens.concat(
+		typeof result === 'string' ? extractArg(result) : result
+	), [])
+
 export default function haicu(message) {
-	const tokens = extractText(message)
+	const tokens = extractArg(message)
 	return tokens
 }
