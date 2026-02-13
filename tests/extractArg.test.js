@@ -9,38 +9,58 @@ test('extractArg', () => {
 			output: []
 		},
 		{
-			input: 'hello',
-			output: [{ type: 'text', text: 'hello' }]
+			input: 'no arg',
+			output: ['no arg']
+		},
+		{
+			input: '{arg}',
+			output: [
+				{ type: 'arg', arg: 'arg' }
+			]
+		},
+		{
+			input: '{arg1} {arg2}',
+			output: [
+				{ type: 'arg', arg: 'arg1' },
+				' ',
+				{ type: 'arg', arg: 'arg2' }
+			]
 		},
 		{
 			input: 'hello, {name}',
 			output: [
-				{ type: 'text', text: 'hello, ' },
-				'{name}'
+				'hello, ',
+				{ type: 'arg', arg: 'name' }
 			]
 		},
 		{
 			input: 'hello, {name }',
 			output: [
-				{ type: 'text', text: 'hello, ' },
-				'{name }'
+				'hello, ',
+				{ type: 'arg', arg: 'name ' },
 			]
 		},
 		{
 			input: `hello
 world`,
-			output: [
-				{ type: 'text', text: `hello
-world` }
-			]
+			output: [`hello
+world`]
 		},
 		{
 			input: `hello {
 arg }`,
 			output: [
-				{ type: 'text', text: 'hello ' },
-				`{
-arg }`
+				'hello ',
+				{ type: 'arg', arg: `
+arg ` }
+			]
+		},
+		{
+			input: 'hello <em>{name}</em>',
+			output: [
+				'hello <em>',
+				{ type: 'arg', arg: 'name' },
+				'</em>'
 			]
 		},
 	])

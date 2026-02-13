@@ -13,10 +13,28 @@ test('extractEscaped', () => {
 			output: ['text']
 		},
 		{
+			input: 'hello {name}',
+			output: ['hello {name}']
+		},
+		{
+			input: "I''m fine",
+			output: ['I', "'", 'm fine']
+		},
+		{
 			input: "This is '{escaped}'",
 			output: [
 				'This is ',
 				{ type: 'text', text: '{escaped}' }
+			]
+		},
+		{
+			input: "first '{escaped one}' second '{escaped2}'.",
+			output: [
+				'first ',
+				{ type: 'text', text: '{escaped one}' },
+				' second ',
+				{ type: 'text', text: '{escaped2}' },
+				'.'
 			]
 		},
 	])
