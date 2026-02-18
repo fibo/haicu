@@ -31,17 +31,17 @@ export const extractEscaped = extract(ESCAPE,
 
 export const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 	`(?<hasOpen>\\${OPEN_BRACKET})?` +
-		`(?<content>[^${OPEN_BRACKET}${CLOSE_BRACKET}]*)` +
+		`(?<text>[^${OPEN_BRACKET}${CLOSE_BRACKET}]*)` +
 	`(?<hasClose>\\${CLOSE_BRACKET})?`,
-({ hasOpen, content, hasClose }) => {
+({ hasOpen, text, hasClose }) => {
 	const result = []
 	if (hasOpen)
 		result.push({ type: 'openBracket' })
-	if (content) {
+	if (text) {
 		if (hasClose)
-			result.push({ type: 'arg', arg: content })
+			result.push({ type: 'rawArg', text })
 		else
-			result.push(content)
+			result.push(text)
 	}
 	if (hasClose)
 		result.push({ type: 'closeBracket' })
@@ -56,6 +56,42 @@ export const extractTag = extract(OPEN_TAG,
 	if (tag)
 		return { type: isClosing ? 'closeTag' : 'openTag', tag }
 })
+
+export const parseArg = str => {
+	const parts = str.split(',')
+	const [first, second] = parts.map(x => x.trim())
+	const third = parts[2]
+
+	const num = +first
+	const nameOrNum = isNaN(num) ?
+		{ type: 'arg', name: first} :
+		{ type: 'arg', num }
+
+	if (parts.length === 1)
+		return [nameOrNum]
+
+	if (second === 'choice') {
+	}
+
+	if (second === 'plural') {
+		const result = [nameOrNum, { type: 'kind', kind: 'plural' }]
+		const offsetMatch = /offset:(\d+)/.exec(third)
+		if (offsetMatch)
+			result.push({ type: 'offset', offset: +offsetMatch[1] })
+		return result
+	}
+
+	if (second === 'select') {
+	}
+
+	if (second === 'selectordinal') {
+	}
+
+	if (['number', 'date', 'time', 'spellout', 'ordinal', 'duration'].includes(second)) {
+		if (parts.length === 2)
+			return [nameOrNum, { type: 'kind', kind: second }]
+	}
+}
 
 const pipe = fn => (tokens, part) => tokens.concat(fn(part))
 

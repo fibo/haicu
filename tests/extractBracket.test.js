@@ -16,7 +16,7 @@ test('extractBracket', () => {
 			input: '{arg1}',
 			output: [
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'arg1' },
+				{ type: 'rawArg', text: 'arg1' },
 				{ type: 'closeBracket' }
 			]
 		},
@@ -24,11 +24,11 @@ test('extractBracket', () => {
 			input: '{arg1} {arg2}',
 			output: [
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'arg1' },
+				{ type: 'rawArg', text: 'arg1' },
 				{ type: 'closeBracket' },
 				' ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'arg2' },
+				{ type: 'rawArg', text: 'arg2' },
 				{ type: 'closeBracket' }
 			]
 		},
@@ -37,7 +37,7 @@ test('extractBracket', () => {
 			output: [
 				'hello, ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'name' },
+				{ type: 'rawArg', text: 'name' },
 				{ type: 'closeBracket' }
 			]
 		},
@@ -46,7 +46,7 @@ test('extractBracket', () => {
 			output: [
 				'hello, ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'name ' },
+				{ type: 'rawArg', text: 'name ' },
 				{ type: 'closeBracket' },
 			]
 		},
@@ -62,7 +62,7 @@ arg }`,
 			output: [
 				'hello ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: `
+				{ type: 'rawArg', text: `
 arg ` },
 				{ type: 'closeBracket' }
 			]
@@ -72,7 +72,7 @@ arg ` },
 			output: [
 				'hello <em>',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'name' },
+				{ type: 'rawArg', text: 'name' },
 				{ type: 'closeBracket' },
 				'</em>'
 			]
@@ -89,7 +89,7 @@ arg ` },
 				{ type: 'openBracket' },
 				'Cart: ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'itemCount, number' },
+				{ type: 'rawArg', text: 'itemCount, number' },
 				{ type: 'closeBracket' },
 				' item',
 				{ type: 'closeBracket' },
@@ -98,7 +98,7 @@ arg ` },
 				{ type: 'openBracket' },
 				'Cart: ',
 				{ type: 'openBracket' },
-				{ type: 'arg', arg: 'itemCount, number' },
+				{ type: 'rawArg', text: 'itemCount, number' },
 				{ type: 'closeBracket' },
 				' items',
 				{ type: 'closeBracket' },
