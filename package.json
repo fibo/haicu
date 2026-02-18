@@ -1,6 +1,6 @@
 {
   "name": "haicu",
-  "description": "is a tiny ICU message tool belt",
+  "description": "ICU message parser",
   "version": "0.0.0",
   "type": "module",
   "types": "./haicu.d.ts",
