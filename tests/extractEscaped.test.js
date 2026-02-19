@@ -24,16 +24,16 @@ test('extractEscaped', () => {
 			input: "This is '{escaped}'",
 			output: [
 				'This is ',
-				{ type: 'text', text: '{escaped}' }
+				{ escaped: '{escaped}' }
 			]
 		},
 		{
 			input: "first '{escaped one}' second '{escaped2}'.",
 			output: [
 				'first ',
-				{ type: 'text', text: '{escaped one}' },
+				{ escaped: '{escaped one}' },
 				' second ',
-				{ type: 'text', text: '{escaped2}' },
+				{ escaped: '{escaped2}' },
 				'.'
 			]
 		},

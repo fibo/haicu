@@ -19,12 +19,12 @@ const extract = (symbol, matcher, resolver) => arg =>
 
 export const extractEscaped = extract(ESCAPE,
 	`${ESCAPE}(?:` +
-		`(?<escapedPart>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})${ESCAPE}` +
+		`(?<escaped>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})${ESCAPE}` +
 		`|(?<doubleQuote>${ESCAPE})` +
 	')',
-({ escapedPart, doubleQuote }) => {
-	if (escapedPart)
-		return { type: 'text', text: escapedPart }
+({ escaped, doubleQuote }) => {
+	if (escaped)
+		return { escaped }
 	if (doubleQuote)
 		return ESCAPE
 })
@@ -89,16 +89,22 @@ export const parseArg = str => {
 	}
 }
 
+export const growAST = ({ context, tokens }, token) => {
+	if (typeof token === 'string')
+		return { context, tokens: tokens.concat(token) }
+
+	if (token.escaped)
+		return { context, tokens: tokens.concat(token.escaped) }
+
+	return { context, tokens: tokens.concat(token) }
+}
+
 const pipe = fn => (tokens, part) => tokens.concat(fn(part))
 
-export const lexer = arg => extractEscaped(arg)
+const haicu = message =>
+	extractEscaped(message)
 	.reduce(pipe(extractTag), [])
 	.reduce(pipe(extractBracket), [])
-	.reduce(pipe(part => (
-		typeof part === 'string' ? ({ type: 'text', text: part }) : part
-	)), [])
+	.reduce(growAST, { context: {}, tokens: [] }).tokens
 
-export default function haicu(message) {
-	const tokens = lexer(message)
-	return tokens
-}
+export default haicu
