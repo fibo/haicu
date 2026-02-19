@@ -29,9 +29,10 @@ test('haicu', () => {
 			input: 'hello <em>world</em>',
 			output: [
 				'hello ',
-				{ type: 'openTag', tag: 'em' },
-				'world',
-				{ type: 'closeTag', tag: 'em' },
+				{
+					tag: 'em',
+					children: ['world']
+				}
 			]
 		},
 		{
@@ -47,11 +48,14 @@ test('haicu', () => {
 			input: 'Hello <em>{name}</em>',
 			output: [
 				'Hello ',
-				{ type: 'openTag', tag: 'em' },
-				{ type: '{' },
-				'name',
-				{ type: '}' },
-				{ type: 'closeTag', tag: 'em' },
+				{
+					tag: 'em',
+					children: [
+						{ type: '{' },
+						'name',
+						{ type: '}' },
+					]
+				}
 			]
 		},
 	] satisfies TestData[])

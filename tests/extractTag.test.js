@@ -15,36 +15,36 @@ test('extractTag', () => {
 		{
 			input: '<b>ok</b>',
 			output: [
-				{ type: 'openTag', tag: 'b' },
+				{ openTag: 'b' },
 				'ok',
-				{ type: 'closeTag', tag: 'b' },
+				{ closeTag: 'b' }
 			]
 		},
 		{
 			input: 'hello <em>world</em>',
 			output: [
 				'hello ',
-				{ type: 'openTag', tag: 'em' },
+				{ openTag: 'em' },
 				'world',
-				{ type: 'closeTag', tag: 'em' },
+				{ closeTag: 'em' }
 			]
 		},
 		{
 			input: '<p>nested <b>tag</b></p>',
 			output: [
-				{ type: 'openTag', tag: 'p' },
+				{ openTag: 'p' },
 				'nested ',
-				{ type: 'openTag', tag: 'b' },
+				{ openTag: 'b' },
 				'tag',
-				{ type: 'closeTag', tag: 'b' },
-				{ type: 'closeTag', tag: 'p' },
+				{ closeTag: 'b' },
+				{ closeTag: 'p' }
 			]
 		},
 		{
 			input: 'Unclosed <em>tag',
 			output: [
 				'Unclosed ',
-				{ type: 'openTag', tag: 'em' },
+				{ openTag: 'em' },
 				'tag',
 			]
 		},
@@ -52,16 +52,16 @@ test('extractTag', () => {
 			input: 'Unopened tag</em>',
 			output: [
 				'Unopened tag',
-				{ type: 'closeTag', tag: 'em' },
+				{ closeTag: 'em' }
 			]
 		},
 		{
 			input: 'hello <em>{name}</em>',
 			output: [
 				'hello ',
-				{ type: 'openTag', tag: 'em' },
+				{ openTag: 'em' },
 				'{name}',
-				{ type: 'closeTag', tag: 'em' },
+				{ closeTag: 'em' }
 			]
 		},
 	])

@@ -50,8 +50,21 @@ export const extractTag = extract(OPEN_TAG,
 	`(?<tag>[^${CLOSE_TAG}]+)${CLOSE_TAG}`,
 ({ tag, isClosing }) => {
 	if (tag)
-		return { type: isClosing ? 'closeTag' : 'openTag', tag }
+		return isClosing ? { closeTag: tag } : { openTag: tag }
 })
+
+export const endOfSubtreeIndex = (isOpen, isClose) => tokens => {
+	let level = 0
+	return tokens.findIndex(token => {
+		if (isClose(token)) {
+			if (level === 0)
+				return true
+			level--
+		}
+		if (isOpen(token))
+			level++
+	})
+}
 
 export const parseArg = str => {
 	const parts = str.split(',')
@@ -89,22 +102,52 @@ export const parseArg = str => {
 	}
 }
 
-export const growAST = ({ context, tokens }, token) => {
+const pickSubtree = (index, list, findCloseIndex) => {
+	const closeIndex = findCloseIndex(list.slice(index + 1))
+	return {
+		subtreeTokens: list.slice(index + 1, index + closeIndex + 1),
+		context: { skipToIndex: index + closeIndex + 1 },
+	}
+}
+
+export const growAST = ({ context, tokens }, token, index, list) => {
+	if (context.skipToIndex) {
+		if (context.skipToIndex === index)
+			delete context.skipToIndex
+		return { context, tokens }
+	}
+
 	if (typeof token === 'string')
 		return { context, tokens: tokens.concat(token) }
 
 	if (token.escaped)
 		return { context, tokens: tokens.concat(token.escaped) }
 
+	if (token.openTag) {
+		const tag = token.openTag
+		const { context, subtreeTokens } = pickSubtree(index, list,
+			endOfSubtreeIndex(token => token.openTag === tag, token => token.closeTag === tag)
+		)
+		return {
+			context,
+			tokens: tokens.concat({
+				tag,
+				children: subtreeTokens
+					.reduce(growAST, { context: {}, tokens: [] })
+					.tokens
+			})
+		}
+	}
+
 	return { context, tokens: tokens.concat(token) }
 }
 
 const pipe = fn => (tokens, part) => tokens.concat(fn(part))
 
-const haicu = message =>
-	extractEscaped(message)
+const haicu = message => extractEscaped(message)
 	.reduce(pipe(extractTag), [])
 	.reduce(pipe(extractBracket), [])
-	.reduce(growAST, { context: {}, tokens: [] }).tokens
+	.reduce(growAST, { context: {}, tokens: [] })
+	.tokens
 
 export default haicu

@@ -1,8 +1,10 @@
 export type HaicuNode =
 	| string
+	| {
+		tag: string
+		children: HaicuNode[]
+	}
 	| { type: 'arg'; arg: string }
-	| { type: 'openTag'; tag: string }
-	| { type: 'closeTag'; tag: string }
 	| { type: '{' }
 	| { type: '}' }
 
