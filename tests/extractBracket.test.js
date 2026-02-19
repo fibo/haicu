@@ -10,45 +10,23 @@ test('extractBracket', () => {
 		},
 		{
 			input: 'no bracket',
-			output: ['no bracket']
+			output: [ 'no bracket' ]
 		},
 		{
 			input: '{arg1}',
-			output: [
-				{ type: '{' },
-				'arg1',
-				{ type: '}' }
-			]
+			output: [ '{', 'arg1', '}' ]
 		},
 		{
 			input: '{arg1} {arg2}',
-			output: [
-				{ type: '{' },
-				'arg1',
-				{ type: '}' },
-				' ',
-				{ type: '{' },
-				'arg2',
-				{ type: '}' }
-			]
+			output: [ '{', 'arg1', '}', ' ', '{', 'arg2', '}' ]
 		},
 		{
 			input: 'hello, {name}',
-			output: [
-				'hello, ',
-				{ type: '{' },
-				'name',
-				{ type: '}' }
-			]
+			output: [ 'hello, ', '{', 'name', '}' ]
 		},
 		{
 			input: 'hello, {name }',
-			output: [
-				'hello, ',
-				{ type: '{' },
-				'name ',
-				{ type: '}' },
-			]
+			output: [ 'hello, ', '{', 'name ', '}' ]
 		},
 		{
 			input: `hello
@@ -61,21 +39,15 @@ world`]
 arg }`,
 			output: [
 				'hello ',
-				{ type: '{' },
+				'{',
 				`
 arg `,
-				{ type: '}' }
+				'}'
 			]
 		},
 		{
 			input: 'hello <em>{name}</em>',
-			output: [
-				'hello <em>',
-				{ type: '{' },
-				'name',
-				{ type: '}' },
-				'</em>'
-			]
+			output: [ 'hello <em>', '{', 'name', '}', '</em>' ]
 		},
 		{
 			input: `{itemCount, plural,
@@ -83,27 +55,27 @@ arg `,
   other {Cart: {itemCount, number} items}
 }`,
 			output: [
-				{ type: '{' },
+				'{',
 				`itemCount, plural,
   one `,
-				{ type: '{' },
+				'{',
 				'Cart: ',
-				{ type: '{' },
+				'{',
 				'itemCount, number',
-				{ type: '}' },
+				'}',
 				' item',
-				{ type: '}' },
+				'}',
 				`
   other `,
-				{ type: '{' },
+				'{',
 				'Cart: ',
-				{ type: '{' },
+				'{',
 				'itemCount, number',
-				{ type: '}' },
+				'}',
 				' items',
-				{ type: '}' },
+				'}',
 				'\n',
-				{ type: '}' }
+				'}'
 			]
 		},
 	])

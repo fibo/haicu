@@ -10,7 +10,7 @@ test('extractTag', () => {
 		},
 		{
 			input: 'no tag',
-			output: ['no tag']
+			output: [ 'no tag' ]
 		},
 		{
 			input: '<b>ok</b>',

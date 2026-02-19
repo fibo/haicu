@@ -16,7 +16,7 @@ test('haicu', () => {
 		},
 		{
 			input: 'hello',
-			output: ['hello']
+			output: [ 'hello' ]
 		},
 		{
 			input: "This is '{escaped}'",
@@ -31,18 +31,25 @@ test('haicu', () => {
 				'hello ',
 				{
 					tag: 'em',
-					children: ['world']
+					ast: [ 'world' ]
 				}
 			]
 		},
 		{
 			input: 'hello {name}',
-			output: [
-				'hello ',
-				{ type: '{' },
-				'name',
-				{ type: '}' },
-			]
+			output: [ 'hello ', { arg: 'name' } ]
+		},
+		{
+			input: 'index {0}',
+			output: [ 'index ', { arg: 0 } ]
+		},
+		{
+			input: '{count, number}',
+			output: [ { arg: 'count', type: 'number' } ]
+		},
+		{
+			input: 'Today is {today, date}',
+			output: [ 'Today is ', { arg: 'today', type: 'date' } ]
 		},
 		{
 			input: 'Hello <em>{name}</em>',
@@ -50,14 +57,32 @@ test('haicu', () => {
 				'Hello ',
 				{
 					tag: 'em',
-					children: [
-						{ type: '{' },
-						'name',
-						{ type: '}' },
-					]
+					ast: [ { arg: 'name' } ]
 				}
 			]
 		},
+		/*
+		{
+			input: 'count, plural, one{item} other{items}',
+			output: [{
+				arg: 'index',
+				type: 'plural',
+				cases: [
+					{ key: 'one', ast: [ 'item' ] },
+					{ key: 'other', ast: [ 'items' ] }
+				]
+			}]
+		},
+		{
+			// TODO complete input
+			input: [ 'index, plural, offset:1 ' ],
+			output: [{
+				arg: 'index',
+				type: 'plural',
+				offset: 1,
+			}]
+		},
+		*/
 	] satisfies TestData[])
 		assert.deepEqual(haicu(input), output)
 })

@@ -10,15 +10,15 @@ test('extractEscaped', () => {
 		},
 		{
 			input: 'text',
-			output: ['text']
+			output: [ 'text' ]
 		},
 		{
 			input: 'hello {name}',
-			output: ['hello {name}']
+			output: [ 'hello {name}' ]
 		},
 		{
 			input: "I''m fine",
-			output: ['I', "'", 'm fine']
+			output: [ 'I', "'", 'm fine' ]
 		},
 		{
 			input: "This is '{escaped}'",

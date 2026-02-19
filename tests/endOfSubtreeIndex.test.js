@@ -1,20 +1,20 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
-import { endOfSubtreeIndex } from 'haicu'
+import { endOfSubTreeIndex } from 'haicu'
 
-test('endOfSubtreeIndex', () => {
+test('endOfSubTreeIndex', () => {
 	const isOpen = token => token === '('
 	const isClose = token => token === ')'
 
 	for (const { input, output } of [
 		{
-			input: ['token', ')'],
+			input: [ 'token', ')' ],
 			output: 1
 		},
 		{
-			input: ['token', '(', ')', ')'],
+			input: [ 'token', '(', ')', ')' ],
 			output: 3
 		},
 	])
-		assert.deepEqual(endOfSubtreeIndex(isOpen, isClose)(input), output)
+		assert.deepEqual(endOfSubTreeIndex(isOpen, isClose)(input), output)
 })
