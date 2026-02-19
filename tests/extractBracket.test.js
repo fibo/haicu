@@ -15,39 +15,39 @@ test('extractBracket', () => {
 		{
 			input: '{arg1}',
 			output: [
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'arg1' },
-				{ type: 'closeBracket' }
+				{ type: '{' },
+				'arg1',
+				{ type: '}' }
 			]
 		},
 		{
 			input: '{arg1} {arg2}',
 			output: [
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'arg1' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				'arg1',
+				{ type: '}' },
 				' ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'arg2' },
-				{ type: 'closeBracket' }
+				{ type: '{' },
+				'arg2',
+				{ type: '}' }
 			]
 		},
 		{
 			input: 'hello, {name}',
 			output: [
 				'hello, ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'name' },
-				{ type: 'closeBracket' }
+				{ type: '{' },
+				'name',
+				{ type: '}' }
 			]
 		},
 		{
 			input: 'hello, {name }',
 			output: [
 				'hello, ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'name ' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				'name ',
+				{ type: '}' },
 			]
 		},
 		{
@@ -61,19 +61,19 @@ world`]
 arg }`,
 			output: [
 				'hello ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: `
-arg ` },
-				{ type: 'closeBracket' }
+				{ type: '{' },
+				`
+arg `,
+				{ type: '}' }
 			]
 		},
 		{
 			input: 'hello <em>{name}</em>',
 			output: [
 				'hello <em>',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'name' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				'name',
+				{ type: '}' },
 				'</em>'
 			]
 		},
@@ -83,27 +83,27 @@ arg ` },
   other {Cart: {itemCount, number} items}
 }`,
 			output: [
-				{ type: 'openBracket' },
+				{ type: '{' },
 				`itemCount, plural,
   one `,
-				{ type: 'openBracket' },
+				{ type: '{' },
 				'Cart: ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'itemCount, number' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				'itemCount, number',
+				{ type: '}' },
 				' item',
-				{ type: 'closeBracket' },
+				{ type: '}' },
 				`
   other `,
-				{ type: 'openBracket' },
+				{ type: '{' },
 				'Cart: ',
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'itemCount, number' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				'itemCount, number',
+				{ type: '}' },
 				' items',
-				{ type: 'closeBracket' },
+				{ type: '}' },
 				'\n',
-				{ type: 'closeBracket' }
+				{ type: '}' }
 			]
 		},
 	])

@@ -2,7 +2,7 @@ const OPEN_BRACKET = '{'
 const CLOSE_BRACKET = '}'
 const OPEN_TAG = '<'
 const CLOSE_TAG = '>'
-const CLOSING_TAG = '/'
+const SLASH = '/'
 const ESCAPE = "'"
 
 const extract = (symbol, matcher, resolver) => arg =>
@@ -36,21 +36,17 @@ export const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 ({ hasOpen, text, hasClose }) => {
 	const result = []
 	if (hasOpen)
-		result.push({ type: 'openBracket' })
-	if (text) {
-		if (hasClose)
-			result.push({ type: 'rawArg', text })
-		else
+		result.push({ type: OPEN_BRACKET })
+	if (text)
 			result.push(text)
-	}
 	if (hasClose)
-		result.push({ type: 'closeBracket' })
+		result.push({ type: CLOSE_BRACKET })
 	return result
 })
 
 export const extractTag = extract(OPEN_TAG,
 	`${OPEN_TAG}` +
-	`(?<isClosing>${CLOSING_TAG})?` +
+	`(?<isClosing>${SLASH})?` +
 	`(?<tag>[^${CLOSE_TAG}]+)${CLOSE_TAG}`,
 ({ tag, isClosing }) => {
 	if (tag)

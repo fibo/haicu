@@ -34,9 +34,9 @@ test('lexer', () => {
 			input: 'hello {name}',
 			output: [
 				{ type: 'text', text: 'hello ' },
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'name' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				{ type: 'text', text: 'name' },
+				{ type: '}' },
 			]
 		},
 		{
@@ -44,9 +44,9 @@ test('lexer', () => {
 			output: [
 				{ type: 'text', text: 'Hello ' },
 				{ type: 'openTag', tag: 'em' },
-				{ type: 'openBracket' },
-				{ type: 'rawArg', text: 'name' },
-				{ type: 'closeBracket' },
+				{ type: '{' },
+				{ type: 'text', text: 'name' },
+				{ type: '}' },
 				{ type: 'closeTag', tag: 'em' },
 			]
 		},
