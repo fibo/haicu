@@ -1,42 +1,46 @@
-type NoneArg = {
+export type NoneArg = {
 	arg: string | number
 }
 
-type SimpleArg = NoneArg & {
+export type SimpleArg = NoneArg & {
 	type: string
 	style?: string
 }
 
-type PluralCase = {
+export type PluralCase = {
 	/**
-	 * @remarks When key is a numbers it represents an explit value like '=1'
+	 * Plural category or explicit value
+	 *
+	 * @remarks When key is a number it represents an explicit value like '=1'
 	 */
 	key: number | 'zero' | 'one' | 'two' | 'few' | 'many' | 'other'
-	ast: HaicuNode[]
+	ast: MessageNode[]
 }
 
-type PluralFormat = {
+export type PluralFormat = {
 	offset?: number
 	cases: PluralCase[]
 }
 
-type PluralArg = NoneArg & {
+export type PluralArg = NoneArg & {
 	plural: PluralFormat
 }
 
-type Arg = NoneArg | SimpleArg | PluralFormat
+export type MessageArg = NoneArg | SimpleArg | PluralFormat
 
-/**
- * A child of an ICU Abstract Syntax Tree.
- */
-export type HaicuNode =
+export type MessageNode =
 	| string
-	| Arg
+	| MessageArg
 	| {
 		tag: string
-		ast: HaicuNode[]
+		ast: MessageNode[]
 	}
 
+/**
+ * Abstract Syntax Tree of an ICU Message
+ */
+export type MessageAST = MessageNode[]
+
 declare module 'haicu' {
-	export default function haicu(message: string): HaicuNode[]
+	export default function haicu(message: string): MessageAST
 }

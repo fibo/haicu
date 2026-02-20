@@ -48,7 +48,7 @@ export const extractTag = extract(OPEN_TAG,
 		return isClosing ? { closeTag: tag } : { openTag: tag }
 })
 
-export const endOfSubTreeIndex = (isOpen, isClose) => tokens => {
+const findClosingIndex = (isOpen, isClose) => tokens => {
 	let level = 0
 	return tokens.findIndex(token => {
 		if (isClose(token)) {
@@ -61,17 +61,28 @@ export const endOfSubTreeIndex = (isOpen, isClose) => tokens => {
 	})
 }
 
-const findCloseBracketIndex = endOfSubTreeIndex(
+const findCloseBracketIndex = findClosingIndex(
 	token => token === OPEN_BRACKET,
 	token => token === CLOSE_BRACKET
 )
 
-const findCloseTagIndex = (tag) => endOfSubTreeIndex(
+const findCloseTagIndex = (tag) => findClosingIndex(
 	token => token.openTag === tag,
 	token => token.closeTag === tag
 )
 
-const argReducer = (tree, token, index, list) => {
+const subTree = (findCloseIndex, list, index) => {
+	const closeIndex = findCloseIndex(list.slice(index))
+	return {
+		closeIndex,
+		tokens: list.slice(index, index + closeIndex)
+	}
+}
+
+const toArg = ({ done, tree }, token, index, list) => {
+	if (done)
+		return { done, tree }
+
 	const parts = token.split(',')
 	const [first, second] = parts.map(x => x.trim())
 	const third = parts[2]
@@ -80,42 +91,44 @@ const argReducer = (tree, token, index, list) => {
 	const arg = { arg: isNaN(num) ? first : num }
 
 	if (!second)
-		return tree.concat(arg)
+		return { done: true, tree: tree.concat(arg) }
 	arg.type = second
 
 	if (second === 'plural') {
-		let firstKey = third.trim()
+		let key = third.trim()
 		const offsetMatch = /offset:(\d+)/.exec(third)
 		if (offsetMatch) {
 			const offset = +offsetMatch[1]
 			arg.offset = offset
-			firstKey = firstKey.slice(`offset:${offset}`.length).trim()
+			key = key.slice(`offset:${offset}`.length).trim()
 		}
-		const firstSubTree = list.slice(index + 2)
-		const closeIndex = findCloseBracketIndex(firstSubTree)
-	    const firstSubTreeTokens = firstSubTree.slice(0, closeIndex)
-		const firstCase = {
-			key: firstKey,
-			ast: firstSubTreeTokens.reduce(treeReducer, { tree: [] }).tree
+		arg.cases = []
+		let rest = list.slice(index)
+		while (rest.length) {
+			const openIndex = rest.findIndex(token => token === OPEN_BRACKET)
+			if (openIndex < 0)
+				return { done: true, tree: tree.concat(arg) }
+
+			const { closeIndex, tokens } = subTree(findCloseBracketIndex, rest, openIndex)
+			if (closeIndex < 0)
+				return { done: true, tree: tree.concat(arg) }
+
+			arg.cases.push({
+				key,
+				ast: tokens.reduce(toAST, { tree: [] }).tree
+			})
+
+			rest = rest.slice(8)
 		}
-		arg.cases = [firstCase]
-		return tree.concat(arg)
+
+		return { done: true, tree: tree.concat(arg) }
 	}
 
 	if (!third)
-		return tree.concat(arg)
+		return { done: true, tree: tree.concat(arg) }
 }
 
-const subTree = (tree, index, list, findCloseIndex, growSubTree) => {
-	const closeIndex = findCloseIndex(list.slice(index + 1))
-	const subTreeTokens = list.slice(index + 1, index + closeIndex + 1)
-	return {
-		skip: index + closeIndex + 1,
-		tree: tree.concat(growSubTree(subTreeTokens))
-	}
-}
-
-const treeReducer = ({ skip, tree }, token, index, list) => {
+const toAST = ({ skip, tree }, token, index, list) => {
 	if (skip)
 		return { tree, skip: skip === index ? undefined : skip }
 
@@ -124,20 +137,23 @@ const treeReducer = ({ skip, tree }, token, index, list) => {
 
 	if (token.openTag) {
 		const tag = token.openTag
-		return subTree(tree, index, list, findCloseTagIndex(tag),
-			subTreeTokens => ({
+		const { tokens, closeIndex } = subTree(findCloseTagIndex(tag), list, index + 1)
+		return {
+			skip: index + closeIndex + 1,
+			tree: tree.concat({
 				tag,
-				ast: subTreeTokens
-					.reduce(treeReducer, { tree: [] })
-					.tree
+				ast: tokens.reduce(toAST, { tree: [] }).tree
 			})
-		)
+		}
 	}
 
-	if (token === OPEN_BRACKET)
-		return subTree(tree, index, list, findCloseBracketIndex,
-			subTreeTokens => subTreeTokens.reduce(argReducer, [])
-		)
+	if (token === OPEN_BRACKET) {
+		const { tokens, closeIndex } = subTree(findCloseBracketIndex, list, index + 1)
+		return {
+			skip: index + 1 + closeIndex,
+			tree: tree.concat(tokens.reduce(toArg, { tree: [] }).tree)
+		}
+	}
 
 	return { tree: tree.concat(token) }
 }
@@ -147,6 +163,6 @@ const pipe = fn => (tokens, part) => tokens.concat(fn(part))
 const haicu = message => extractEscaped(message)
 	.reduce(pipe(extractTag), [])
 	.reduce(pipe(extractBracket), [])
-	.reduce(treeReducer, { tree: [] }).tree
+	.reduce(toAST, { tree: [] }).tree
 
 export default haicu

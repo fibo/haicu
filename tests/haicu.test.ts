@@ -1,11 +1,11 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import haicu from 'haicu'
-import type { HaicuNode } from 'haicu'
+import type { MessageAST } from 'haicu'
 
 type TestData = {
 	input: string
-	output: HaicuNode[]
+	output: MessageAST
 }
 
 test('haicu', () => {
