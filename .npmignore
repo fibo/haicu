@@ -1,4 +1,4 @@
 .editorconfig
 DEVELOP.md
-tests
+test.ts
 tsconfig.json
