@@ -3,6 +3,7 @@ const CLOSE_BRACKET = '}'
 const OPEN_TAG = '<'
 const CLOSE_TAG = '>'
 const SLASH = '/'
+const HASH = '#'
 const ESCAPE = "'"
 
 const extract = (symbol, matcher, resolver) => arg =>
@@ -21,12 +22,15 @@ const extractEscaped = extract(ESCAPE,
 	`${ESCAPE}(?:` +
 		`(?<escaped>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})${ESCAPE}` +
 		`|(?<doubleQuote>${ESCAPE})` +
+		`|(?<hash>${HASH}${ESCAPE})` +
 	')',
-({ escaped, doubleQuote }) => {
+({ escaped, doubleQuote, hash }) => {
 	if (escaped)
 		return { escaped }
 	if (doubleQuote)
 		return ESCAPE
+	if (hash)
+		return HASH
 })
 
 export const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
@@ -105,8 +109,13 @@ const toArg = ({ done, tree }, token, index, list) => {
 		arg.cases = [key, ...list.slice(index + 1)].reduce(({ cases, skip }, part, index, array) => {
 			if (skip)
 				return { cases, skip: skip === index ? undefined : skip }
-			const key = part.trim()
-			if (['zero', 'one', 'two', 'few', 'many', 'other'].includes(key)) {
+
+			let key = part.trim()
+			const explicitValueMatch = /=(\d+)/.exec(key)
+			if (explicitValueMatch)
+				key = +explicitValueMatch[1]
+
+			if (['zero', 'one', 'two', 'few', 'many', 'other'].includes(key) || typeof key === 'number') {
 				const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
 				const rest = array.slice(openBracketIndex + 1)
 				const closeBracketIndex = findCloseBracketIndex(rest)
@@ -115,7 +124,7 @@ const toArg = ({ done, tree }, token, index, list) => {
 					skip: index + openBracketIndex + closeBracketIndex,
 					cases: cases.concat({
 						key,
-						ast: astTokens.reduce(toAST, { tree: [] }).tree
+						ast: astTokens.reduce(toAST, { isArg: true, tree: [] }).tree
 					})
 				}
 			}
@@ -129,34 +138,44 @@ const toArg = ({ done, tree }, token, index, list) => {
 		return { done: true, tree: tree.concat(arg) }
 }
 
-const toAST = ({ skip, tree }, token, index, list) => {
+const toAST = ({ isArg, skip, tree }, token, index, list) => {
 	if (skip)
 		return { tree, skip: skip === index ? undefined : skip }
 
 	if (token.escaped)
-		return { tree: tree.concat(token.escaped) }
+		return { isArg, tree: tree.concat(token.escaped) }
 
 	if (token.openTag) {
 		const tag = token.openTag
 		const { tokens, closeIndex } = subTree(findCloseTagIndex(tag), list, index + 1)
 		return {
+			isArg,
 			skip: index + closeIndex + 1,
 			tree: tree.concat({
 				tag,
 				ast: tokens.reduce(toAST, { tree: [] }).tree
-			})
+			}),
 		}
 	}
 
 	if (token === OPEN_BRACKET) {
 		const { tokens, closeIndex } = subTree(findCloseBracketIndex, list, index + 1)
 		return {
+			isArg,
 			skip: index + 1 + closeIndex,
 			tree: tree.concat(tokens.reduce(toArg, { tree: [] }).tree)
 		}
 	}
 
-	return { tree: tree.concat(token) }
+	if (isArg && typeof token === 'string' && token.includes(HASH))
+		return {
+			isArg,
+			tree: tree.concat(token.split(HASH).reduce(
+				(acc, part, index) => index % 2 === 1 ? acc.concat({ value: true }, part) : acc.concat(part)
+			), [])
+		}
+
+	return { isArg, tree: tree.concat(token) }
 }
 
 const pipe = fn => (tokens, part) => tokens.concat(fn(part))

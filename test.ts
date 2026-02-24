@@ -20,10 +20,11 @@ test('haicu', () => {
 		},
 		{
 			input: "This is '{escaped}'",
-			output: [
-				'This is ',
-				'{escaped}'
-			]
+			output: [ 'This is ', '{escaped}' ]
+		},
+		{
+			input: "escaped '#' hash",
+			output: [ 'escaped ', '#', ' hash' ]
 		},
 		{
 			input: "I''m fine",
@@ -144,6 +145,35 @@ world`]
 						key: 'other'
 					}
 				],
+			} ]
+		},
+		{
+			input: `{ COUNT, plural,
+    =0 {There are no results.}
+    one {There is one result.}
+    other {There are # results.}
+}`,
+			output: [ {
+				arg: 'COUNT',
+				type: 'plural',
+				cases: [
+					{
+						key: 0,
+						ast: [ 'There are no results.' ]
+					},
+					{
+						key: 'one',
+						ast: [ 'There is one result.' ]
+					},
+					{
+						key: 'other',
+						ast: [
+							'There are ',
+							{ value: true },
+							' results.'
+						]
+					}
+				]
 			} ]
 		},
 	] satisfies TestData[])

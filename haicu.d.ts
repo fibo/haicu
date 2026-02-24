@@ -7,6 +7,15 @@ export type SimpleArg = NoneArg & {
 	style?: string
 }
 
+/**
+ * A placeholder is identified by a hash character (#).
+ */
+export type PlaceHolder = {
+	value: true
+}
+
+export type PluralMessageNode = MessageNode | Placeholder
+
 export type PluralCase = {
 	/**
 	 * Plural category or explicit value
@@ -14,7 +23,7 @@ export type PluralCase = {
 	 * @remarks When key is a number it represents an explicit value like '=1'
 	 */
 	key: number | 'zero' | 'one' | 'two' | 'few' | 'many' | 'other'
-	ast: MessageNode[]
+	ast: PluralMessageNode[]
 }
 
 export type PluralFormat = {
