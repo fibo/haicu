@@ -6,6 +6,8 @@ const SLASH = '/'
 const HASH = '#'
 const ESCAPE = "'"
 
+const empty = x => !!x
+
 const extract = (symbol, matcher, resolver) => arg =>
 	typeof arg !== 'string' ? arg : arg.matchAll(RegExp(
 	`(?<before>[^${symbol}]*)` +
@@ -15,7 +17,7 @@ const extract = (symbol, matcher, resolver) => arg =>
 'g')).reduce((tokens, { groups: { before, after, ...rest } = {} }) =>
 	tokens.concat(
 		...[before, resolver(rest), after]
-		.filter(x => !!x)
+		.filter(empty)
 	), [])
 
 const extractEscaped = extract(ESCAPE,
@@ -41,7 +43,7 @@ export const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 	hasOpen && OPEN_BRACKET,
 	text,
 	hasClose && CLOSE_BRACKET
-].filter(x => !!x)))
+].filter(empty)))
 
 const extractTag = extract(OPEN_TAG,
 	`${OPEN_TAG}` +
@@ -98,44 +100,51 @@ const toArg = ({ done, tree }, token, index, list) => {
 		return { done: true, tree: tree.concat(arg) }
 	arg.type = second
 
-	if (second === 'plural') {
-		let key = third.trim()
+	if (!third)
+		return { done: true, tree: tree.concat(arg) }
+
+	const isPlural = second === 'plural'
+	const isSelectordinal = second === 'selectordinal'
+	let key = third.trim()
+
+	if (isPlural) {
 		const offsetMatch = /offset:(\d+)/.exec(third)
 		if (offsetMatch) {
 			const offset = +offsetMatch[1]
 			arg.offset = offset
 			key = key.slice(`offset:${offset}`.length).trim()
 		}
-		arg.cases = [key, ...list.slice(index + 1)].reduce(({ cases, skip }, part, index, array) => {
-			if (skip)
-				return { cases, skip: skip === index ? undefined : skip }
+	}
 
-			let key = part.trim()
+	arg.cases = [key, ...list.slice(index + 1)].reduce(({ cases, skip }, part, index, array) => {
+		if (skip)
+			return { cases, skip: skip === index ? undefined : skip }
+
+		let key = part.trim()
+
+		if (isPlural || isSelectordinal) {
 			const explicitValueMatch = /=(\d+)/.exec(key)
 			if (explicitValueMatch)
 				key = +explicitValueMatch[1]
+		}
 
-			if (['zero', 'one', 'two', 'few', 'many', 'other'].includes(key) || typeof key === 'number') {
-				const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
-				const rest = array.slice(openBracketIndex + 1)
-				const closeBracketIndex = findCloseBracketIndex(rest)
-				const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
-				return {
-					skip: index + openBracketIndex + closeBracketIndex,
-					cases: cases.concat({
-						key,
-						ast: astTokens.reduce(toAST, { isArg: true, tree: [] }).tree
-					})
-				}
+		if ((isPlural || isSelectordinal) && ['zero', 'one', 'two', 'few', 'many', 'other'].includes(key) || typeof key === 'number') {
+			const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
+			const rest = array.slice(openBracketIndex + 1)
+			const closeBracketIndex = findCloseBracketIndex(rest)
+			const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
+			return {
+				skip: index + openBracketIndex + closeBracketIndex,
+				cases: cases.concat({
+					key,
+					ast: astTokens.reduce(toAST, { isArg: isPlural || isSelectordinal, tree: [] }).tree
+				})
 			}
-			return { cases }
-		}, { cases: [] }).cases
+		}
+		return { cases }
+	}, { cases: [] }).cases
 
-		return { done: true, tree: tree.concat(arg) }
-	}
-
-	if (!third)
-		return { done: true, tree: tree.concat(arg) }
+	return { done: true, tree: tree.concat(arg) }
 }
 
 const toAST = ({ isArg, skip, tree }, token, index, list) => {
@@ -171,8 +180,8 @@ const toAST = ({ isArg, skip, tree }, token, index, list) => {
 		return {
 			isArg,
 			tree: tree.concat(token.split(HASH).reduce(
-				(acc, part, index) => index % 2 === 1 ? acc.concat({ value: true }, part) : acc.concat(part)
-			), [])
+				(acc, part, index) => index % 2 === 1 ? acc.concat({ value: true }, part) : acc.concat(part), []
+			).filter(empty))
 		}
 
 	return { isArg, tree: tree.concat(token) }

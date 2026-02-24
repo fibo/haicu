@@ -119,6 +119,22 @@ world`]
 			} ]
 		},
 		{
+			input: '{rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} place',
+			output: [
+				{
+					arg: 'rank',
+					type: 'selectordinal',
+					cases: [
+						{ key: 'one', ast: [ { value: true }, 'st' ] },
+						{ key: 'two', ast: [ { value: true }, 'nd' ] },
+						{ key: 'few', ast: [ { value: true }, 'rd' ] },
+						{ key: 'other', ast: [ { value: true }, 'th' ] },
+					]
+				},
+				' place'
+			]
+		},
+		{
 			input: `{itemCount, plural, offset:1
   one {Cart: {itemCount, number} item}
   other {Cart: {itemCount, number} items}

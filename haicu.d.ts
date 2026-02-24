@@ -27,12 +27,17 @@ export type PluralCase = {
 }
 
 export type PluralFormat = {
+}
+
+export type PluralArg = NoneArg & {
+	type: 'plural'
 	offset?: number
 	cases: PluralCase[]
 }
 
-export type PluralArg = NoneArg & {
-	plural: PluralFormat
+export type SelectordinalArg = NoneArg & {
+	type: 'selectordinal'
+	cases: PluralCase[]
 }
 
 export type MessageArg = NoneArg | SimpleArg | PluralFormat
