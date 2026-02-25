@@ -8,6 +8,10 @@ const ESCAPE = "'"
 
 const empty = x => !!x
 
+const error = {
+	noClosingBracket: { error: 'No closing bracket' }
+}
+
 const extract = (symbol, matcher, resolver) => arg =>
 	typeof arg !== 'string' ? arg : arg.matchAll(RegExp(
 	`(?<before>[^${symbol}]*)` +
@@ -35,7 +39,7 @@ const extractEscaped = extract(ESCAPE,
 		return HASH
 })
 
-export const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
+const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 	`(?<hasOpen>\\${OPEN_BRACKET})?` +
 		`(?<text>[^${OPEN_BRACKET}${CLOSE_BRACKET}]*)` +
 	`(?<hasClose>\\${CLOSE_BRACKET})?`,
@@ -132,6 +136,8 @@ const toArg = ({ done, tree }, token, index, list) => {
 			const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
 			const rest = array.slice(openBracketIndex + 1)
 			const closeBracketIndex = findCloseBracketIndex(rest)
+			if (closeBracketIndex === -1)
+				return error.noClosingBracket
 			const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
 			return {
 				skip: index + openBracketIndex + closeBracketIndex,
@@ -169,6 +175,12 @@ const toAST = ({ isArg, skip, tree }, token, index, list) => {
 
 	if (token === OPEN_BRACKET) {
 		const { tokens, closeIndex } = subTree(findCloseBracketIndex, list, index + 1)
+		if (closeIndex === -1)
+			return {
+				isArg,
+				skip: list.length,
+				tree: tree.concat(error.noClosingBracket)
+			}
 		return {
 			isArg,
 			skip: index + 1 + closeIndex,

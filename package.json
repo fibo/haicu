@@ -3,8 +3,16 @@
   "description": "ICU message parser",
   "version": "0.0.0",
   "type": "module",
-  "types": "./haicu.d.ts",
-  "exports": "./haicu.js",
+  "exports": {
+    ".": {
+      "import": "./haicu.js",
+      "types": "./haicu.d.ts"
+    },
+    "./validators.js": {
+      "import": "./validators.js",
+      "types": "./validators.d.ts"
+    }
+  },
   "scripts": {
     "test": "node --test",
     "tsc": "tsc --project ."
