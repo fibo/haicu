@@ -2,9 +2,9 @@
 
 ## Requirements
 
-Install development dependencies, without saving
+Install development dependencies without saving them:
 
-```shell
+```sh
 npm install typescript @types/node --no-save
 ```
 
@@ -12,7 +12,7 @@ npm install typescript @types/node --no-save
 
 Use EditorConfig, see [.editorconfig file](./.editorconfig).
 
-Basically use tabs everywhere except on JSON files where spaces are used in particular for _package.json_.
+Use tabs everywhere except in JSON files, where spaces are used (in particular for _package.json_).
 
 No semicolons.
 
@@ -20,15 +20,15 @@ No semicolons.
 
 Run tests as usual with
 
-```shell
+```sh
 npm test
 ```
 
-All tests are located in [tests/](./tests) folder.
+All tests are in [test.ts](./test.ts).
 
 Check typings with
 
-```shell
+```sh
 npm run tsc
 ```
 
@@ -80,4 +80,3 @@ See https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/tex
 ### SelectFormat
 
 See https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/SelectFormat.html
-
