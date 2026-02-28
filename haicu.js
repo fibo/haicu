@@ -24,19 +24,19 @@ const extract = (symbol, matcher, resolver) => arg =>
 		.filter(empty)
 	), [])
 
-const extractEscaped = extract(ESCAPE,
+export const extractEscaped = extract(ESCAPE,
 	`${ESCAPE}(?:` +
-		`(?<escaped>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})${ESCAPE}` +
-		`|(?<doubleQuote>${ESCAPE})` +
-		`|(?<hash>${HASH}${ESCAPE})` +
+		`(?<arg>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})` +
+		`|(?<quote>${ESCAPE})` +
+		`|(?<hash>${HASH})` +
+		`|(?<tag>${OPEN_TAG}${SLASH}?[^${CLOSE_TAG}]+${CLOSE_TAG})` +
 	')',
-({ escaped, doubleQuote, hash }) => {
+({ arg, quote, hash, tag }) => {
+	if (quote)
+		return ESCAPE
+	const escaped = arg ?? hash ?? tag
 	if (escaped)
 		return { escaped }
-	if (doubleQuote)
-		return ESCAPE
-	if (hash)
-		return HASH
 })
 
 const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
@@ -136,8 +136,10 @@ const toArg = ({ done, tree }, token, index, list) => {
 			const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
 			const rest = array.slice(openBracketIndex + 1)
 			const closeBracketIndex = findCloseBracketIndex(rest)
+
 			if (closeBracketIndex === -1)
 				return error.noClosingBracket
+
 			const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
 			return {
 				skip: index + openBracketIndex + closeBracketIndex,

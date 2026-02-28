@@ -21,6 +21,14 @@ const testData: Array<{
 		output: [ 'escaped ', '#', ' hash' ]
 	},
 	{
+		input: "escaped '<tag>'",
+		output: [ 'escaped ', '<tag>' ]
+	},
+	{
+		input: "escaped '<tag>' with children '</tag>'",
+		output: [ 'escaped ', '<tag>', ' with children ', '</tag>' ]
+	},
+	{
 		input: "I''m fine",
 		output: [ 'I', "'", 'm fine' ]
 	},

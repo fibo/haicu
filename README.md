@@ -21,7 +21,7 @@ npm install haicu
 
 or just copy the [haicu.js](./haicu.js) code in your project.
 
-## Parser
+## Usage
 
 The `haicu` package _default export_ is an ICU message parser.
 
@@ -39,7 +39,7 @@ It returns an _Abstract Syntax Tree_ (AST) of an ICU message where a node can be
 
 See [types.ts](./types.ts) for details.
 
-## Errors
+### Errors
 
 The invalid message `Hello {name` produces this output
 
@@ -51,7 +51,18 @@ but the `haicu` parser __does not throw errors__.
 
 You should use [validators](#validators) to check your translations before deploying them.
 
-## Validators
+### Escape
+
+The escape character is quote: `'`.
+
+It can be used to escape:
+
+- brackets: `This is '{escaped}'`
+- tags: `escaped '<tag>'`
+- another quote: `I''m fine`
+- hashes: `escaped '#' hash`
+
+### Validators
 
 To validate an ICU message node or AST, import a validator from `haicu/validators.js`.
 
