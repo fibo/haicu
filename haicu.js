@@ -9,7 +9,8 @@ const ESCAPE = "'"
 const empty = x => !!x
 
 const error = {
-	noClosingBracket: { error: 'No closing bracket' }
+	bracket: { error: 'No closing bracket' },
+	tag: { error: 'No closing tag' }
 }
 
 const extract = (symbol, matcher, resolver) => arg =>
@@ -24,7 +25,7 @@ const extract = (symbol, matcher, resolver) => arg =>
 		.filter(empty)
 	), [])
 
-export const extractEscaped = extract(ESCAPE,
+const extractEscaped = extract(ESCAPE,
 	`${ESCAPE}(?:` +
 		`(?<arg>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})` +
 		`|(?<quote>${ESCAPE})` +
@@ -52,10 +53,15 @@ const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 const extractTag = extract(OPEN_TAG,
 	`${OPEN_TAG}` +
 	`(?<isClosing>${SLASH})?` +
-	`(?<tag>[^${CLOSE_TAG}]+)${CLOSE_TAG}`,
-({ tag, isClosing }) => {
-	if (tag)
-		return isClosing ? { closeTag: tag } : { openTag: tag }
+	`(?<tag>[^${CLOSE_TAG}${SLASH}]+)(?<isAutoClosed>${SLASH})?${CLOSE_TAG}`,
+({ tag, isClosing, isAutoClosed }) => {
+	if (!tag)
+		return
+	if (isClosing)
+		return { closeTag: tag }
+	if (isAutoClosed)
+		return { autoClosedTag: tag }
+	return { openTag: tag }
 })
 
 const findClosingIndex = (isOpen, isClose) => tokens => {
@@ -138,7 +144,7 @@ const toArg = ({ done, tree }, token, index, list) => {
 			const closeBracketIndex = findCloseBracketIndex(rest)
 
 			if (closeBracketIndex === -1)
-				return error.noClosingBracket
+				return error.bracket
 
 			const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
 			return {
@@ -162,27 +168,31 @@ const toAST = ({ isArg, skip, tree }, token, index, list) => {
 	if (token.escaped)
 		return { isArg, tree: tree.concat(token.escaped) }
 
+	if (token.autoClosedTag)
+		return {
+			isArg,
+			tree: tree.concat({ tag: token.autoClosedTag, ast: [] })
+		}
+
 	if (token.openTag) {
 		const tag = token.openTag
 		const { tokens, closeIndex } = subTree(findCloseTagIndex(tag), list, index + 1)
+		if (closeIndex === -1)
+			return { isArg, tree: tree.concat(error.tag) }
 		return {
 			isArg,
 			skip: index + closeIndex + 1,
 			tree: tree.concat({
 				tag,
 				ast: tokens.reduce(toAST, { tree: [] }).tree
-			}),
+			})
 		}
 	}
 
 	if (token === OPEN_BRACKET) {
 		const { tokens, closeIndex } = subTree(findCloseBracketIndex, list, index + 1)
 		if (closeIndex === -1)
-			return {
-				isArg,
-				skip: list.length,
-				tree: tree.concat(error.noClosingBracket)
-			}
+			return { isArg, tree: tree.concat(error.bracket) }
 		return {
 			isArg,
 			skip: index + 1 + closeIndex,

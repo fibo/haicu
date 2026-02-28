@@ -48,7 +48,7 @@ export const isMessageArg = node => {
 }
 
 export const isMessageTag = node =>
-	isObject(node) && isNonEmptyString(node.tag) && isMessageAST(node.ast)
+	isObject(node) && isNonEmptyString(node.tag) && (node.ast.length === 0 || isMessageAST(node.ast))
 
 const isMessageNode = node => [
 	isNonEmptyString,

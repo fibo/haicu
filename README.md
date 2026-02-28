@@ -28,7 +28,8 @@ The `haicu` package _default export_ is an ICU message parser.
 ```js
 import haicu from 'haicu'
 
-haicu('Hello {name}') // [ 'Hello ', { arg: 'name' } ]
+haicu('Hello {name}')
+// [ 'Hello ', { arg: 'name' } ]
 ```
 
 It returns an _Abstract Syntax Tree_ (AST) of an ICU message where a node can be
@@ -38,6 +39,36 @@ It returns an _Abstract Syntax Tree_ (AST) of an ICU message where a node can be
 - `MessageArg`: an argument like `{ arg: 'name' }`
 
 See [types.ts](./types.ts) for details.
+
+### Tags
+
+_HTML-like_ tags can be used inside messages.
+
+```js
+haicu('<p>nested <b>tag</b></p>')
+// [ { tag: 'p', ast: [ 'nested ', { tag: 'b', ast: [ 'tag' ] } ] } ]
+```
+
+Notice that tag arguments are __not supported__.
+In particular it is a best practice in translations to not hardcode links.
+For example
+
+- __bad__: `Click <a href="http://example.com">here</a>`
+- __good__: `Click <a>here</a>`
+
+Just add the `href` at runtime, it could depend on the locale and it should not be hardcoded anyways.
+Remember you can use any name for your tags, so for example if you have two links this translation is fine
+
+```
+<link1>Learn more</link1> or <link2>download<link2>
+```
+
+Tags can be _auto-closed_, for example
+
+```js
+haicu('auto-closed <br/> tag')
+// [ 'auto-closed ', { tag: 'br', ast: [] }, ' tag' ]
+```
 
 ### Errors
 

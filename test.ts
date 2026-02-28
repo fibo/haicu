@@ -62,6 +62,17 @@ const testData: Array<{
 		]
 	},
 	{
+		input: 'auto-closed <br/> tag',
+		output: [
+			'auto-closed ',
+			{
+				tag: 'br',
+				ast: []
+			},
+			' tag'
+		]
+	},
+	{
 		input: 'hello {name}',
 		output: [ 'hello ', { arg: 'name' } ]
 	},
@@ -201,6 +212,10 @@ const noClosingBrackets = [
 	'{count, plural, one{item}',
 ]
 
+const noClosingTag = [
+	'unclosed <tag>'
+]
+
 test('haicu', () => {
 	for (const { input, output } of testData)
 		assert.deepEqual(haicu(input), output, `haicu('${input}') == ${JSON.stringify(output)}`)
@@ -214,7 +229,8 @@ test('validators', () => {
 test('invalid messages', () => {
 	for (const input of [
 		'',
-		...noClosingBrackets
+		...noClosingBrackets,
+		...noClosingTag
 	])
 		assert.ok(!isMessageAST(haicu(input)), `!isMessageAST(haicu('${input}'))`)
 })
@@ -227,6 +243,17 @@ test('error: No closing bracket', () => {
 				if (typeof node !== 'object')
 					return
 				return (node as unknown as { error: string }).error = 'No closing bracket'
+			}
+		))
+})
+
+test('error: No closing tag', () => {
+	for (const input of noClosingTag)
+		assert.ok(haicu(input).some(
+			node => {
+				if (typeof node !== 'object')
+					return
+				return (node as unknown as { error: string }).error = 'No closing tag'
 			}
 		))
 })
