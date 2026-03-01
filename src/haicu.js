@@ -10,7 +10,10 @@ const empty = x => !!x
 
 const error = {
 	bracket: { error: 'No closing bracket' },
-	tag: { error: 'No closing tag' }
+	format: { error: 'Expected format' },
+	other: { error: 'Missing case other' },
+	tag: { error: 'No closing tag' },
+	type: { error: 'Expected type' },
 }
 
 const extract = (symbol, matcher, resolver) => arg =>
@@ -30,9 +33,9 @@ const extractEscaped = extract(ESCAPE,
 		`(?<arg>\\${OPEN_BRACKET}[^${CLOSE_BRACKET}${ESCAPE}]*\\${CLOSE_BRACKET})` +
 		`|(?<quote>${ESCAPE})` +
 		`|(?<hash>${HASH})` +
-		`|(?<tag>${OPEN_TAG}${SLASH}?[^${CLOSE_TAG}]+${CLOSE_TAG})` +
+		`|(?<tag>${OPEN_TAG}${SLASH}?[^${CLOSE_TAG}]+${SLASH}?${CLOSE_TAG}?)` +
 	')',
-({ arg, quote, hash, tag }) => {
+({ quote, arg, hash, tag }) => {
 	if (quote)
 		return ESCAPE
 	const escaped = arg ?? hash ?? tag
@@ -51,15 +54,17 @@ const extractBracket = extract(`${OPEN_BRACKET}${CLOSE_BRACKET}`,
 ].filter(empty)))
 
 const extractTag = extract(OPEN_TAG,
-	`${OPEN_TAG}` +
-	`(?<isClosing>${SLASH})?` +
-	`(?<tag>[^${CLOSE_TAG}${SLASH}]+)(?<isAutoClosed>${SLASH})?${CLOSE_TAG}`,
-({ tag, isClosing, isAutoClosed }) => {
+	OPEN_TAG +
+	`(?<closing>${SLASH})?` +
+	`(?<tag>[^${CLOSE_TAG}${SLASH}]+)` +
+	`(?<autoClosed>${SLASH})?` +
+	CLOSE_TAG,
+({ tag, autoClosed, closing }) => {
 	if (!tag)
 		return
-	if (isClosing)
+	if (closing)
 		return { closeTag: tag }
-	if (isAutoClosed)
+	if (autoClosed)
 		return { autoClosedTag: tag }
 	return { openTag: tag }
 })
@@ -106,16 +111,24 @@ const toArg = ({ done, tree }, token, index, list) => {
 	const num = +first
 	const arg = { arg: isNaN(num) ? first : num }
 
-	if (!second)
+	if (parts.length === 1)
 		return { done: true, tree: tree.concat(arg) }
+
+	if (second.trim() === '' && parts.length >= 2)
+		return { done: true, tree: tree.concat({ ...arg, ...error.type }) }
+
 	arg.type = second
 
 	if (!third)
 		return { done: true, tree: tree.concat(arg) }
 
 	const isPlural = second === 'plural'
-	const isSelectordinal = second === 'selectordinal'
+	const isPluralOrSelectordinal = isPlural || second === 'selectordinal'
+	let hasOtherCase = false
 	let key = third.trim()
+
+	if (key === '' && parts.length === 3)
+		return { done: true, tree: tree.concat({ ...arg, ...error.format }) }
 
 	if (isPlural) {
 		const offsetMatch = /offset:(\d+)/.exec(third)
@@ -132,31 +145,37 @@ const toArg = ({ done, tree }, token, index, list) => {
 
 		let key = part.trim()
 
-		if (isPlural || isSelectordinal) {
+		if (isPluralOrSelectordinal) {
 			const explicitValueMatch = /=(\d+)/.exec(key)
 			if (explicitValueMatch)
 				key = +explicitValueMatch[1]
 		}
 
-		if ((isPlural || isSelectordinal) && ['zero', 'one', 'two', 'few', 'many', 'other'].includes(key) || typeof key === 'number') {
-			const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
-			const rest = array.slice(openBracketIndex + 1)
-			const closeBracketIndex = findCloseBracketIndex(rest)
+		if (key === '' || key === OPEN_BRACKET || key === CLOSE_BRACKET)
+			return { cases }
 
-			if (closeBracketIndex === -1)
-				return error.bracket
+		if (key === 'other')
+			hasOtherCase = true
 
-			const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
-			return {
-				skip: index + openBracketIndex + closeBracketIndex,
-				cases: cases.concat({
-					key,
-					ast: astTokens.reduce(toAST, { isArg: isPlural || isSelectordinal, tree: [] }).tree
-				})
-			}
+		const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
+		const rest = array.slice(openBracketIndex + 1)
+		const closeBracketIndex = findCloseBracketIndex(rest)
+
+		if (closeBracketIndex === -1)
+			return error.bracket
+
+		const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
+		return {
+			skip: index + openBracketIndex + closeBracketIndex,
+			cases: cases.concat({
+				key,
+				ast: astTokens.reduce(toAST, { isArg: isPluralOrSelectordinal, tree: [] }).tree
+			})
 		}
-		return { cases }
 	}, { cases: [] }).cases
+
+	if (!hasOtherCase)
+		arg.cases.push(error.other)
 
 	return { done: true, tree: tree.concat(arg) }
 }

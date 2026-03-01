@@ -21,6 +21,19 @@ const isPluralCase = arg => {
 		return ast.every(isPluralMessageNode)
 }
 
+export const findError = list => {
+	for (const node of list) {
+		if (node.error)
+			return node.error
+		const sublist = node.ast ?? node.cases
+		if (!sublist)
+			continue
+		const error = findError(sublist)
+		if (error)
+			return error
+	}
+}
+
 export const isMessageArg = node => {
 	if (!isObject(node))
 		return false

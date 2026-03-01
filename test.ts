@@ -1,8 +1,8 @@
 import { strict as assert } from 'node:assert'
-import { test } from 'node:test'
+import { describe, test } from 'node:test'
 import haicu from 'haicu'
 import type { MessageAST } from 'haicu'
-import { isMessageAST } from 'haicu/validators.js'
+import { findError, isMessageAST } from 'haicu/validators.js'
 
 const testData: Array<{
 	input: string
@@ -21,7 +21,7 @@ const testData: Array<{
 		output: [ 'escaped ', '#', ' hash' ]
 	},
 	{
-		input: "escaped '<tag>'",
+		input: "escaped '<tag>",
 		output: [ 'escaped ', '<tag>' ]
 	},
 	{
@@ -41,6 +41,10 @@ const testData: Array<{
 			'{escaped2}',
 			'.'
 		]
+	},
+	{
+		input: "Made with '<3",
+		output: [ 'Made with ',  '<3' ]
 	},
 	{
 		input: 'hello <em>world</em>',
@@ -207,13 +211,31 @@ world` ]
 	},
 ]
 
-const noClosingBrackets = [
-	'Hello {name',
-	'{count, plural, one{item}',
-]
+const errorsMap = {
+	'Expected format': [
+		'{num, number, }',
+	],
 
-const noClosingTag = [
-	'unclosed <tag>'
+	'Expected type': [
+		'{num, }',
+		'{num, ,}',
+	],
+
+	'Missing case other': [
+		'{num, selectordinal, one {missing other}}',
+	],
+
+	'No closing bracket': [
+		'Hello {name', // This error is also shown in README.md
+		'{count, plural, one{item}',
+	],
+
+	'No closing tag': [
+		'unclosed <tag>',
+	],
+}
+
+const missingCaseOther = [
 ]
 
 test('haicu', () => {
@@ -229,31 +251,18 @@ test('validators', () => {
 test('invalid messages', () => {
 	for (const input of [
 		'',
-		...noClosingBrackets,
-		...noClosingTag
+		...Object.values(errorsMap).flat()
 	])
 		assert.ok(!isMessageAST(haicu(input)), `!isMessageAST(haicu('${input}'))`)
 })
 
-// This error message is also shown in README.md
-test('error: No closing bracket', () => {
-	for (const input of noClosingBrackets)
-		assert.ok(haicu(input).some(
-			node => {
-				if (typeof node !== 'object')
-					return
-				return (node as unknown as { error: string }).error = 'No closing bracket'
+describe('error', () => {
+	for (const [errorMessage, testData] of Object.entries(errorsMap))
+		test(errorMessage, () => {
+			for (const input of testData) {
+				const ast = haicu(input)
+				const error = findError(ast)
+				assert.equal(error, errorMessage)
 			}
-		))
-})
-
-test('error: No closing tag', () => {
-	for (const input of noClosingTag)
-		assert.ok(haicu(input).some(
-			node => {
-				if (typeof node !== 'object')
-					return
-				return (node as unknown as { error: string }).error = 'No closing tag'
-			}
-		))
+		})
 })

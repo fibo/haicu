@@ -89,7 +89,7 @@ The escape character is quote: `'`.
 It can be used to escape:
 
 - brackets: `This is '{escaped}'`
-- tags: `escaped '<tag>'`
+- tags or `<` (opening angular bracket): `escaped '<tag>'`, `Made with '<3`
 - another quote: `I''m fine`
 - hashes: `escaped '#' hash`
 
@@ -108,14 +108,16 @@ export function testTranslations (messages) {
     const ast = haicu(message)
     if (isMessageAST(ast))
       continue
-    const error = ast.find(node => node.error).error
+    const error = findError(ast)
     throw new Error(`Invalid ICU message ${message} with error '${error}'`)
   }
 }
 ```
 
-All validators are type-guards:
+The `haicu/validators.js` exports these _type-guards_:
 
 - `isMessageAST(arg: unknown): arg is MessageAST`
 - `isMessageArg(arg: unknown): arg is MessageArg`
 - `isMessageTag(arg: unknown): arg is MessageTag`
+
+And a `findError(ast: MessageAST): string` util.
