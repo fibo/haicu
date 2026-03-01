@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./haicu.js",
-      "types": "./haicu.d.ts"
+      "import": "./src/haicu.js",
+      "types": "./src/haicu.d.ts"
     },
     "./validators.js": {
-      "import": "./validators.js",
-      "types": "./validators.d.ts"
+      "import": "./src/validators.js",
+      "types": "./src/validators.d.ts"
     }
   },
   "scripts": {

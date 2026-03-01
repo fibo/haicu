@@ -19,7 +19,7 @@ With [npm](https://npmjs.org/) do
 npm install haicu
 ```
 
-or just copy the [haicu.js](./haicu.js) code in your project.
+or just copy the [haicu.js](./src/haicu.js) code in your project.
 
 ## Usage
 
@@ -38,7 +38,7 @@ It returns an _Abstract Syntax Tree_ (AST) of an ICU message where a node can be
 - `MessageTag`: an HTML-like tag
 - `MessageArg`: an argument like `{ arg: 'name' }`
 
-See [types.ts](./types.ts) for details.
+See [types.ts](./src/types.ts) for details.
 
 ### Tags
 
