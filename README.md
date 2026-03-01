@@ -1,10 +1,10 @@
 <div align="center">
   <br>
   <br>
-  <img src="media/logo.png" alt="haicu" height="300">
+  <img src="media/logo.png" alt="haICU" height="300">
   <br>
   <br>
-  <em>tiny ICU message parser</em>
+  tiny ICU message parser
   <br>
   <br>
   <hr>

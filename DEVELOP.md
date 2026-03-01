@@ -80,3 +80,8 @@ See https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/tex
 ### SelectFormat
 
 See https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/SelectFormat.html
+
+## Artwork
+
+The _logo_ and GitHub _social preview_ are implemented by [media/artwork.html](./media/artwork.html).
+
