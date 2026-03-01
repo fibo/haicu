@@ -10,6 +10,13 @@
 		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 
 		<style>
+			:root {
+				--shadow-color: #bbb;
+				--shadow-offset: 4px;
+				--box-shadow: var(--shadow-color) var(--shadow-offset) var(--shadow-offset) 0px 0px;
+				--text-shadow: var(--shadow-color) var(--shadow-offset) var(--shadow-offset);
+			}
+
 			body {
 				font-family: Helvetica, sans-serif;
 			}
@@ -38,6 +45,10 @@
 
 				color: #111;
 				text-align: center;
+
+				--shadow-color: #bbb;
+				--shadow-offset: 4px;
+				text-shadow: var(--shadow-color) var(--shadow-offset) var(--shadow-offset);
 			}
 
 			.icu {
@@ -54,8 +65,13 @@
 				background: #111;
 				color: #eee;
 
+				--shadow-offset: 8px;
+				--shadow-color: #aaa;
+				box-shadow: var(--shadow-color) var(--shadow-offset) var(--shadow-offset) 0px 0px;
+
 				corner-shape: notch;
-				border-radius: 95px 20px 40px 20px;
+				border-radius: 95px calc(var(--shadow-offset) * 2) 40px 0px;
+
 			}
 
 			.social-preview {
@@ -71,7 +87,7 @@
 			}
 
 			.description {
-				font-size: 32px;
+				font-size: 40px;
 				display: flex;
 				flex-direction: column;
 			}
