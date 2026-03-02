@@ -111,6 +111,13 @@ world` ]
 		output: [ { arg: 'count', type: 'number' } ]
 	},
 	{
+		input: '{increase, number, percent} complete',
+		output: [
+			{ arg: 'increase', type: 'number', format: 'percent' },
+			' complete'
+		]
+	},
+	{
 		input: 'Today is {today, date}',
 		output: [ 'Today is ', { arg: 'today', type: 'date' } ]
 	},
@@ -209,6 +216,18 @@ world` ]
 			]
 		} ]
 	},
+	{
+		input: '{gender, select, male {his} female {her} other {x}}',
+		output: [ {
+			arg: 'gender',
+			type: 'select',
+			cases: [
+				{ key: 'male', ast: [ 'his' ] },
+				{ key: 'female', ast: [ 'her' ] },
+				{ key: 'other', ast: [ 'x' ] }
+			]
+		} ]
+	},
 ]
 
 const errorsMap = {
@@ -223,6 +242,8 @@ const errorsMap = {
 
 	'Missing case other': [
 		'{num, selectordinal, one {missing other}}',
+		'{num, plural, one {missing other}}',
+		'{gender, select, female {missing other}}',
 	],
 
 	'No closing bracket': [
@@ -234,9 +255,6 @@ const errorsMap = {
 		'unclosed <tag>',
 	],
 }
-
-const missingCaseOther = [
-]
 
 test('haicu', () => {
 	for (const { input, output } of testData)

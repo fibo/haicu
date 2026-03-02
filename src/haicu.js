@@ -104,48 +104,52 @@ const toArg = ({ done, tree }, token, index, list) => {
 	if (done)
 		return { done, tree }
 
-	const parts = token.split(',')
-	const [first, second] = parts.map(x => x.trim())
-	const third = parts[2]
+	const parts = token.split(',').map(x => x.trim())
+	const numParts = parts.length
 
-	const num = +first
-	const arg = { arg: isNaN(num) ? first : num }
+	const num = +parts[0]
+	const arg = { arg: isNaN(num) ? parts[0] : num }
 
-	if (parts.length === 1)
+	if (numParts === 1)
 		return { done: true, tree: tree.concat(arg) }
 
-	if (second.trim() === '' && parts.length >= 2)
+	const type = parts[1]
+
+	if (type === '' && numParts >= 2)
 		return { done: true, tree: tree.concat({ ...arg, ...error.type }) }
 
-	arg.type = second
+	arg.type = type
 
-	if (!third)
+	if (numParts === 2)
 		return { done: true, tree: tree.concat(arg) }
 
-	const isPlural = second === 'plural'
-	const isPluralOrSelectordinal = isPlural || second === 'selectordinal'
+	let info = parts[2]
+	const isPlural = type === 'plural'
+	const isSelectordinal = type === 'selectordinal'
 	let hasOtherCase = false
-	let key = third.trim()
 
-	if (key === '' && parts.length === 3)
-		return { done: true, tree: tree.concat({ ...arg, ...error.format }) }
+	if (numParts === 3 && !isPlural && !isSelectordinal && type !== 'select') {
+		if (info === '')
+			return { done: true, tree: tree.concat({ ...arg, ...error.format }) }
+		return { done: true, tree: tree.concat({ ...arg, format: info }) }
+	}
 
 	if (isPlural) {
-		const offsetMatch = /offset:(\d+)/.exec(third)
+		const offsetMatch = /offset:(\d+)/.exec(info)
 		if (offsetMatch) {
 			const offset = +offsetMatch[1]
 			arg.offset = offset
-			key = key.slice(`offset:${offset}`.length).trim()
+			info = info.slice(`offset:${offset}`.length).trim()
 		}
 	}
 
-	arg.cases = [key, ...list.slice(index + 1)].reduce(({ cases, skip }, part, index, array) => {
+	arg.cases = [info, ...list.slice(index + 1)].reduce(({ cases, skip }, part, index, array) => {
 		if (skip)
 			return { cases, skip: skip === index ? undefined : skip }
 
 		let key = part.trim()
 
-		if (isPluralOrSelectordinal) {
+		if (isPlural || isSelectordinal) {
 			const explicitValueMatch = /=(\d+)/.exec(key)
 			if (explicitValueMatch)
 				key = +explicitValueMatch[1]
@@ -169,7 +173,7 @@ const toArg = ({ done, tree }, token, index, list) => {
 			skip: index + openBracketIndex + closeBracketIndex,
 			cases: cases.concat({
 				key,
-				ast: astTokens.reduce(toAST, { isArg: isPluralOrSelectordinal, tree: [] }).tree
+				ast: astTokens.reduce(toAST, { isArg: true, tree: [] }).tree
 			})
 		}
 	}, { cases: [] }).cases

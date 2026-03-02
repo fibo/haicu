@@ -1,17 +1,29 @@
-type NonEmptyString = string
+/**
+ * Any string, excluding ''.
+ */
+export type NonEmptyString = string
 
 /**
- * Positive integers including zero.
+ * Positive integers, including 0.
  */
-type PositiveInteger = number
+export type PositiveInteger = number
 
+/**
+ * Plain argument, can be a string with the argument name or a number with argument position.
+ */
 export type NoneArg = {
 	arg: NonEmptyString | PositiveInteger
 }
 
+/**
+ * An argument with a type and optional format.
+ *
+ * @example
+ * { arg: 'day', type: 'date', format: 'YYYY-MM-DD' }
+ */
 export type SimpleArg = NoneArg & {
 	type: NonEmptyString
-	style?: NonEmptyString
+	format?: NonEmptyString
 }
 
 /**
@@ -21,30 +33,43 @@ export type Placeholder = {
 	value: true
 }
 
-export type PluralMessageNode = MessageNode | Placeholder
+export type NumericCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other'
 
-export type PluralCase = {
+/**
+ * Used by plural and selectordinal cases.
+ */
+export type NumericCase = {
 	/**
-	 * Plural category or explicit value.
+	 * Numeric category or explicit value.
 	 *
 	 * @remarks When key is a number it represents an explicit value like '=1'
 	 */
-	key: PositiveInteger | 'zero' | 'one' | 'two' | 'few' | 'many' | 'other'
-	ast: PluralMessageNode[]
+	key: PositiveInteger | NumericCategory
+	ast: Array<MessageNode | Placeholder>
 }
 
 export type PluralArg = NoneArg & {
 	type: 'plural'
 	offset?: number
-	cases: PluralCase[]
+	cases: NumericCase[]
 }
 
 export type SelectordinalArg = NoneArg & {
 	type: 'selectordinal'
-	cases: PluralCase[]
+	cases: NumericCase[]
 }
 
-export type MessageArg = NoneArg | SimpleArg | PluralArg | SelectordinalArg
+export type StringCase = {
+	key: NonEmptyString
+	ast: MessageNode[]
+}
+
+export type SelectArg = NoneArg & {
+	type: 'select'
+	cases: StringCase[]
+}
+
+export type MessageArg = NoneArg | SimpleArg | PluralArg | SelectArg | SelectordinalArg
 
 export type MessageTag = {
 	tag: NonEmptyString

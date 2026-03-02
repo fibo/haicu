@@ -11,6 +11,38 @@
 </div>
 <br>
 
+## Introduction
+
+This `haicu` package provides an ICU message parser you can use to translate messages for example in a multi-lingual web site.
+
+You can use messages with arguments, plurals, HTML-like tags, etc.
+
+I have been using for years tools like [FormatJS](https://formatjs.github.io/) and others but they all come with a bloated implementation that increases a lot the bundle of your webapp. Packages like `react-intl`, `react-i18next`, `messageformat` are great software and a good starting point if you want to learn the best practices. However the only core part that you actually need nowadays is an ICU message parser, everything else can be done with few custom lines of code tailored on your needs.
+
+There are also other use cases where you may want something lighter, for instance if you want to translate a desktop app menu or an automatic email.
+
+The goal of `haicu` is to have a tiny and minimal implementation (it is below 3kb when minified) of an ICU message parser as well as documented examples about how to implement translated content.
+
+The package name comes from [Haiku](https://en.wikipedia.org/wiki/Haiku) which is a type of short form poetry that originated in Japan.
+
+For example
+
+> 寺の鐘消ゆる
+> 花の香は撞く
+> 夕べかな
+
+by Matsuo Bashō
+
+> The temple bell stops
+> but the sound keeps coming out of the flowers.
+
+## Status and roadmap
+
+Implementation of ICU message parser is complete.
+Even if `haicu` has still a 0.x version, API will probably not change.
+The package will reach a stable 1.0 version once there are enough tests and documentation.
+After 1.0 the API will be freezed and the package will be updated only for bug fixes.
+
 ## Installation
 
 With [npm](https://npmjs.org/) do
@@ -89,7 +121,9 @@ The escape character is quote: `'`.
 It can be used to escape:
 
 - brackets: `This is '{escaped}'`
-- tags or `<` (opening angular bracket): `escaped '<tag>'`, `Made with '<3`
+- tags or `<` (opening angular bracket):
+    - `escaped '<tag>'`
+    - `Made with '<3`
 - another quote: `I''m fine`
 - hashes: `escaped '#' hash`
 
@@ -121,3 +155,4 @@ The `haicu/validators.js` exports these _type-guards_:
 - `isMessageTag(arg: unknown): arg is MessageTag`
 
 And a `findError(ast: MessageAST): string` util.
+
