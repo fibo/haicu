@@ -1,5 +1,6 @@
 .editorconfig
 DEVELOP.md
-media/
+assets/
+index.html
 test.ts
 tsconfig.json

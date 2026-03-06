@@ -1,7 +1,7 @@
 <div align="center">
   <br>
   <br>
-  <img src="media/logo.png" alt="haICU" height="300">
+  <img src="assets/logo.png" alt="haICU" height="300">
   <br>
   <br>
   tiny ICU message parser
@@ -110,7 +110,8 @@ The invalid message `Hello {name` produces this output
 [ 'Hello ', { error: 'No closing bracket' } ]
 ```
 
-but the `haicu` parser __does not throw errors__.
+Notice that the `haicu` parser __does not throw errors__ by design.
+The idea is that if something fails you may get an empty or partial translation instead of risking a blank page.
 
 You should use [validators](#validators) to check your translations before deploying them.
 

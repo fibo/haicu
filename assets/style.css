@@ -1,0 +1,50 @@
+:root {
+	--font-sans: system-ui, sans-serif;
+	--font-serif: Rockwell, 'Rockwell Nova', 'Roboto Slab', 'DejaVu Serif', 'Sitka Small', serif;
+	--font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+
+	--font-size: 16px;
+	--font-size-1: 110px;
+	--font-size-2: 68px;
+	--font-size-3: 42px;
+	--font-size-4: 26px;
+}
+
+html {
+	-moz-text-size-adjust: none;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+}
+
+body {
+	font-family: var(--font-sans);
+	font-size: var(--font-size);
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-serif);
+}
+
+h1 {
+	font-size: var(--font-size-1);
+}
+
+p {
+	line-height: 1.618;
+}
+
+code {
+	font-family: var(--font-mono);
+}
+
+button, input, select, textarea {
+  font-size: var(--font-size);
+	line-height: 1.618;
+}
+input, textarea {
+  font-family: var(--font-sans);
+}
+button, label {
+  font-family: var(--font-sans2);
+}
+

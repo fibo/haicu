@@ -83,5 +83,5 @@ See https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/tex
 
 ## Artwork
 
-The _logo_ and GitHub _social preview_ are implemented by [media/artwork.html](./media/artwork.html).
+The _logo_ and GitHub _social preview_ are implemented by [assets/artwork.html](./assets/artwork.html).
 
