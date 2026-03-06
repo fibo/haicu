@@ -1,7 +1,7 @@
 <div align="center">
   <br>
   <br>
-  <img src="media/logo.png" alt="haICU" height="300">
+  <img src="assets/logo.png" alt="haICU" height="300">
   <br>
   <br>
   tiny ICU message parser
