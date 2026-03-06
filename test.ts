@@ -228,6 +228,117 @@ world` ]
 			]
 		} ]
 	},
+	{
+		input: 'Your subscription will expire in {days, plural, =0 {today} one {tomorrow} other {in {days} days}}. Purchase your subscription beforehand to keep all benefits.',
+		output: [
+			'Your subscription will expire in ',
+			{
+				arg: 'days',
+				type: 'plural',
+				cases: [
+					{ key: 0, ast: [ 'today' ] },
+					{ key: 'one', ast: [ 'tomorrow' ] },
+					{ key: 'other', ast: [ 'in ', { arg: 'days' }, ' days' ] },
+				]
+			},
+			'. Purchase your subscription beforehand to keep all benefits.'
+		]
+	},
+	{
+		input: '{gender_of_host, select, female {{num_guests, plural, offset:1 =0 {{host} does not give a party.}=1 {{host} invites {guest} to her party.}=2 {{host} invites {guest} and one other person to her party.}other {{host} invites {guest} and # other people to her party.}}}male {{num_guests, plural, offset:1 =0 {{host} does not give a party.}=1 {{host} invites {guest} to his party.}=2 {{host} invites {guest} and one other person to his party.}other {{host} invites {guest} and # other people to his party.}}}other {{num_guests, plural, offset:1 =0 {{host} does not give a party.}=1 {{host} invites {guest} to their party.}=2 {{host} invites {guest} and one other person to their party.}other {{host} invites {guest} and # other people to their party.}}}}',
+		output: [
+			{
+				arg: 'gender_of_host',
+				type: 'select',
+				cases: [
+					{
+						key: 'female',
+						ast: [
+							{
+								arg: 'num_guests',
+								type: 'plural',
+								offset: 1,
+								cases: [
+									{
+										key: 0,
+										ast: [ { arg: 'host' }, ' does not give a party.' ]
+									},
+									{
+										key: 1,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' to her party.' ],
+									},
+									{
+										key: 2,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and one other person to her party.' ]
+									},
+									{
+										key: 'other',
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and # other people to her party.' ]
+									}
+								]
+							}
+						]
+					},
+					{
+						key: 'male',
+						ast: [
+							{
+								arg: 'num_guests',
+								type: 'plural',
+								offset: 1,
+								cases: [
+									{
+										key: 0,
+										ast: [ { arg: 'host' }, ' does not give a party.' ]
+									},
+									{
+										key: 1,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' to his party.' ]
+									},
+									{
+										key: 2,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and one other person to his party.' ]
+									},
+									{
+										key: 'other',
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and # other people to his party.' ]
+									}
+								]
+							}
+						]
+					},
+					{
+						key: 'other',
+						ast: [
+							{
+								arg: 'num_guests',
+								offset: 1,
+								type: 'plural',
+								cases: [
+									{
+										key: 0,
+										ast: [ { arg: 'host' }, ' does not give a party.' ]
+									},
+									{
+										key: 1,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' to their party.' ]
+									},
+									{
+										key: 2,
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and one other person to their party.' ]
+									},
+									{
+										key: 'other',
+										ast: [ { arg: 'host' }, ' invites ', { arg: 'guest' }, ' and # other people to their party.' ]
+									}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	},
 ]
 
 const errorsMap = {

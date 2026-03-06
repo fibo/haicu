@@ -155,25 +155,28 @@ const toArg = ({ done, tree }, token, index, list) => {
 				key = +explicitValueMatch[1]
 		}
 
-		if (key === '' || key === OPEN_BRACKET || key === CLOSE_BRACKET)
+		if (key === '' || key === OPEN_BRACKET || key === CLOSE_BRACKET) {
 			return { cases }
+		}
 
 		if (key === 'other')
 			hasOtherCase = true
 
-		const openBracketIndex = array.slice(index).findIndex(token => token === OPEN_BRACKET)
-		const rest = array.slice(openBracketIndex + 1)
-		const closeBracketIndex = findCloseBracketIndex(rest)
+		const rest = array.slice(index)
+		const openBracketIndex = rest.indexOf(OPEN_BRACKET)
+		const closeBracketIndex = findCloseBracketIndex(rest.slice(openBracketIndex + 1))
 
 		if (closeBracketIndex === -1)
 			return error.bracket
 
-		const astTokens = array.slice(index + openBracketIndex + 1).slice(0, closeBracketIndex)
 		return {
 			skip: index + openBracketIndex + closeBracketIndex,
 			cases: cases.concat({
 				key,
-				ast: astTokens.reduce(toAST, { isArg: true, tree: [] }).tree
+				ast: array
+					.slice(index + openBracketIndex + 1)
+					.slice(0, closeBracketIndex)
+					.reduce(toAST, { isArg: true, tree: [] }).tree
 			})
 		}
 	}, { cases: [] }).cases
